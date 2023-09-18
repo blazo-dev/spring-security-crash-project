@@ -2,11 +2,12 @@ package dev.blazo.base.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import static org.springframework.security.config.Customizer.withDefaults;
 
 import dev.blazo.base.utils.AuthorityName;
 
@@ -29,6 +30,7 @@ import dev.blazo.base.utils.AuthorityName;
  */
 
 @Configuration
+@EnableWebSecurity
 public class WebSecurityConfig {
 
     /**
@@ -144,12 +146,14 @@ public class WebSecurityConfig {
          * autenticar el usuario.
          * 
          */
-
-        return http.httpBasic().and()
+        http.httpBasic(withDefaults())
                 .authorizeHttpRequests(
-                        authorize -> authorize.requestMatchers("/admin/**").hasAuthority(AuthorityName.ADMIN.name())
-                                .requestMatchers("/deny/**")
-                                .denyAll().anyRequest().authenticated())
-                .build();
+                        authorize -> authorize
+                                .requestMatchers("/error").permitAll()
+                                .requestMatchers("/admin/**").hasAuthority(AuthorityName.ADMIN.name())
+                                .requestMatchers("/deny/**").denyAll()
+                                .anyRequest().authenticated());
+
+        return http.build();
     }
 }
